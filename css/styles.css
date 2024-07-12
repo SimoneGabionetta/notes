@@ -1,0 +1,70 @@
+:root {
+    --bg:#fafafa;
+    --linear-gradient:linear-gradient(160deg, #dc99bf, #fdc968);
+    --white:#ffff;
+    --border-color: #ccc;
+    --bg-input: #525356;
+    --bg-export: #007BFF; 
+    --color-icon: #555;
+    --fixed: #3c3c3f;
+    --color-input: #ddd;
+    --text-color: #2c2c2c;
+    --header-bg: #007BFF; 
+    --green:  #394c38;
+    --hover-btn: #1100ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat',sans-serif;
+}
+
+body {
+    background: var(--bg-);
+    color: var(--text-color);
+}
+
+header {
+    border-bottom:1px solid var(--border-color) ;
+    padding: 1rem 2rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background-image:var(--linear-gradient) ;
+}
+
+#search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+#search-input {
+    background-color: var(--bg);
+    border-radius: 5px;
+    border:none;
+    padding: 1rem;
+    font-weight: bold;
+    width: 400px;
+    border: 1px solid var(--text-color);
+}
+
+#search-input::placeholder {
+    color: var(--text-color);
+
+}
+#export-notes {
+    background: var(--bg-export);
+    border-radius: 4px;
+    color: var(--white);
+    padding: 1rem 2rem;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+#export-notes:hover {
+    background-color: var(--hover-btn);
+}
