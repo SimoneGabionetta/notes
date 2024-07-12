@@ -68,3 +68,92 @@ header {
 #export-notes:hover {
     background-color: var(--hover-btn);
 }
+
+#add-note-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    margin: 1rem auto 0;
+    gap: 1rem;    
+}
+
+
+
+#add-note-container button {
+    padding: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: var(--bg-export);
+    color: var(--white);
+}
+
+#notes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,250px);
+    padding: 2rem;
+    gap: 2rem;
+  
+}
+
+.note {
+    min-height: 200px;
+    padding:1rem;
+    border:1px solid var(--border-color);
+    background-color: var(--bg);
+    border-radius: 10px;
+    color: var(--text-color);
+    position: relative;
+   
+}
+
+.note textarea {
+    background-color: transparent;
+    resize: none;
+    color: var(--text-color);
+    border: none;
+    height: 100%;
+    outline: none;
+}
+
+.note textarea::placeholder {
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+.note .bi-pin {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    font-size: 1.2rem;    
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px; 
+}
+.note:hover > i {
+    opacity: 1;
+}
+
+.note .bi-x-lg,
+.note .bi-file-earmark-plus {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    font-size: 0.9rem;
+    padding: 5px;
+    transition: .3s;
+    color: var(--color-icon);
+    cursor: pointer;
+    opacity: 0;
+}
+.note .bi-file-earmark-plus{
+    top: 40px;
+}
+.note .bi-x-lg:hover,
+.note .bi-file-earmark-plus:hover {
+    color: var(--text-color);   
+}
+
+.fixed {
+   background-color: var(--header-bg);
+}
