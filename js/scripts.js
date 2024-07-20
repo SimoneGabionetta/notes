@@ -1,89 +1,155 @@
-function createNoteElement() {
-    const noteDiv = document.createElement("div");
-    noteDiv.classList.add("note");
-
-    const textarea = document.createElement("textarea");
-    textarea.placeholder = "Add text";
-
-    const pinIcon = document.createElement("i");
-    pinIcon.classList.add("bi", "bi-pin");
-    pinIcon.addEventListener('click', function() {
-        noteDiv.style.backgroundColor = getRandomColor(); // Altera a cor de fundo ao clicar no ícone de fixar
-    });
-
-    const deleteIcon = document.createElement("i");
-    deleteIcon.classList.add("bi", "bi-x-lg");
-    deleteIcon.addEventListener('click', function() {
-        noteDiv.remove(); // Remove a nota ao clicar no ícone de deletar
-    });
-
-    const duplicateIcon = document.createElement("i");
-    duplicateIcon.classList.add("bi", "bi-file-earmark-plus");
-    duplicateIcon.addEventListener('click', function() {
-        const clonedNote = noteDiv.cloneNode(true);
-        notesContainer.appendChild(clonedNote);
-        addNoteEventListeners(clonedNote); // Adiciona event listeners à nota clonada
-    });
-
-    noteDiv.appendChild(textarea);
-    noteDiv.appendChild(pinIcon);
-    noteDiv.appendChild(deleteIcon);
-    noteDiv.appendChild(duplicateIcon);
-
-    return noteDiv;
-}
-
-function addNoteEventListeners(noteDiv) {
-    const pinIcon = noteDiv.querySelector(".bi-pin");
-    pinIcon.addEventListener('click', function() {
-        noteDiv.style.backgroundColor = getRandomColor(); // Altera a cor de fundo ao clicar no ícone de fixar
-    });
-
-    const deleteIcon = noteDiv.querySelector(".bi-x-lg");
-    deleteIcon.addEventListener('click', function() {
-        noteDiv.remove(); // Remove a nota ao clicar no ícone de deletar
-    });
-}
-
-function getRandomColor() {
-    const colors = ["#c2ff3d", "#ff3de8", "#3dc2ff", "#04e022", "#bc83e6", "#eebb328"];
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
-}
-
-// Add note btn
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", () => {
     const addNoteBtn = document.querySelector(".add-note");
     const notesContainer = document.getElementById("notes-container");
+    const exportBtn = document.getElementById("export-notes");
+    const searchInput = document.getElementById("search-input");
 
-    addNoteBtn.addEventListener('click', function() {
-        const noteElement = createNoteElement();
-        notesContainer.appendChild(noteElement);
-    });
+    if (addNoteBtn && notesContainer && exportBtn && searchInput) {
+        // Load notes from Local Storage
+        loadNotes();
 
-    notesContainer.addEventListener('click', function(event) {
-        if (event.target.classList.contains("bi-file-earmark-plus")) {
-            const noteDiv = event.target.closest(".note");
-            if (noteDiv) {
-                const clonedNote = noteDiv.cloneNode(true);
-                notesContainer.appendChild(clonedNote);
-                addNoteEventListeners(clonedNote); // Adiciona event listeners à nota clonada
+        // Add event listener to button for adding a new note
+        addNoteBtn.addEventListener("click", addNote);
+
+        // Add event listener to button for exporting notes
+        exportBtn.addEventListener("click", exportToCSV);
+
+        // Add event listener to search input
+        searchInput.addEventListener("input", filterNotes);
+    }
+
+    function addNote() {
+        const note = createNoteElement();
+        notesContainer.appendChild(note);
+        saveNotes();
+    }
+
+    function createNoteElement(title = "Note Title", content = "", isPinned = false) {
+        const note = document.createElement("div");
+        note.classList.add("note");
+        if (isPinned) {
+            // Add "fixed" class to pin the note
+            note.classList.add("fixed");
+            // Select a random color for pinned notes
+            const randomColor = getRandomColor();
+            note.style.backgroundColor = randomColor;
+        }
+        note.innerHTML = `
+            <div class="actions">
+                <i class="bi bi-pin"></i>
+                <i class="bi bi-x-lg"></i>
+                <i class="bi bi-file-earmark-plus"></i>
+            </div>
+            <h3 contenteditable="true">${title}</h3>
+            <textarea placeholder="Your note here...">${content}</textarea>
+        `;
+
+        // Add events to save when content is changed
+        note.querySelector("h3").addEventListener("input", saveNotes);
+        note.querySelector("textarea").addEventListener("input", saveNotes);
+
+        // Add event to remove note
+        note.querySelector(".bi-x-lg").addEventListener("click", () => {
+            note.remove();
+            saveNotes();
+        });
+
+        // Add event to duplicate note
+        note.querySelector(".bi-file-earmark-plus").addEventListener("click", () => {
+            const newNote = createNoteElement(note.querySelector("h3").innerText, note.querySelector("textarea").value);
+            notesContainer.appendChild(newNote);
+            saveNotes();
+        });
+
+        // Add event to pin/unpin note
+        note.querySelector(".bi-pin").addEventListener("click", () => {
+            note.classList.toggle("fixed");
+            if (note.classList.contains("fixed")) {
+                const randomColor = getRandomColor();
+                note.style.backgroundColor = randomColor;
+            } else {
+                note.style.backgroundColor = ""; // Reset color if unpinned
+            }
+            saveNotes();
+        });
+
+        return note;
+    }
+
+    function saveNotes() {
+        const notes = [];
+        document.querySelectorAll(".note").forEach(note => {
+            const title = note.querySelector("h3").innerText;
+            const content = note.querySelector("textarea").value;
+            const isPinned = note.classList.contains("fixed");
+            const color = note.style.backgroundColor;
+            notes.push({ title, content, isPinned, color });
+        });
+        localStorage.setItem("notes", JSON.stringify(notes));
+    }
+
+    function loadNotes() {
+        const savedNotes = localStorage.getItem("notes");
+        if (savedNotes) {
+            try {
+                const notes = JSON.parse(savedNotes);
+                // Clear notes container
+                notesContainer.innerHTML = "";
+                // Add pinned notes first
+                notes.filter(note => note.isPinned).forEach(note => {
+                    const noteElement = createNoteElement(note.title, note.content, true);
+                    noteElement.style.backgroundColor = note.color; // Apply saved color
+                    notesContainer.appendChild(noteElement);
+                });
+                // Add unpinned notes
+                notes.filter(note => !note.isPinned).forEach(note => {
+                    const noteElement = createNoteElement(note.title, note.content, false);
+                    notesContainer.appendChild(noteElement);
+                });
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
             }
         }
-    });
+    }
 
-    const searchInput = document.getElementById("search-input");
-    searchInput.addEventListener('input', function() {
+    
+    function exportToCSV() {
+        const notes = JSON.parse(localStorage.getItem("notes"));
+        if (!notes || notes.length === 0) {
+            alert("No notes to export!");
+            return;
+        }
+
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + "Title,Content\n"
+            + notes.map(note => `"${note.title.replace(/"/g, '""')}","${note.content.replace(/"/g, '""')}"`)
+                    .join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "notes.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
+
+    function filterNotes() {
         const searchText = searchInput.value.toLowerCase();
-        const notes = notesContainer.querySelectorAll(".note");
-
-        notes.forEach(function(note) {
-            const text = note.querySelector("textarea").value.toLowerCase();
-            if (text.includes(searchText)) {
+        document.querySelectorAll(".note").forEach(note => {
+            const title = note.querySelector("h3").innerText.toLowerCase();
+            const content = note.querySelector("textarea").value.toLowerCase();
+            if (title.includes(searchText) || content.includes(searchText)) {
                 note.style.display = "block";
             } else {
                 note.style.display = "none";
             }
         });
-    });
+    }
+
+    // Function to get random color
+    function getRandomColor() {
+        const colors = ["#FF6633", "#FFB399", "#FF33FF", "#FFFF99", "#00B3E6"];
+        const randomIndex = Math.floor(Math.random() * colors.length);
+        return colors[randomIndex];
+    }
 });
